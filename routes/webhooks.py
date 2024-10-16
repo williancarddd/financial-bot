@@ -3,7 +3,7 @@ from config import Config
 
 webhook_bp = Blueprint('webhook_bp', __name__)
 
-@webhook_bp.route('/webhook', methods=['GET'])
+@webhook_bp.route('/', methods=['GET'])
 def whatsapp_webhook_verification():
     # Obter o token de verificação do arquivo de configuração
     VERIFY_TOKEN = Config.VERIFY_TOKEN

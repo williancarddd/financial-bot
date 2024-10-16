@@ -21,7 +21,9 @@ class Config:
     WEBHOOK_CHALLENGE_DELAY = float(os.getenv('WEBHOOK_CHALLENGE_DELAY', 0.5))
     APP_SECRET = os.getenv('APP_SECRET')
     TOKEN = os.getenv('TOKEN')
-    WEBHOOK_ENDPOINT = "/webhook"
+
 
     # Outras configurações
     TEST_USER_PHONE = '+5569992643914'  # Número de teste
+
+config = Config()
