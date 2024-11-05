@@ -1,3 +1,17 @@
+
+def error_message():
+    return "⚠️ Houve um erro ao processar sua solicitação. Tente novamente mais tarde."
+
+def under_development_message():
+    return "🤖 Desculpe, ainda estou em desenvolvimento e não posso processar mensagens financeiras."
+
+def trial_confirmation_message():
+    return "✅ Seu período de teste de 1 dia foi ativado. Aproveite!"
+
+def invalid_command_message():
+    return "❌ Comando inválido. Por favor, tente novamente ou digite 'ajuda' para ver os comandos disponíveis."
+
+
 def welcome_message():
     return (
         "👋 Olá! Seja bem-vindo ao seu assistente financeiro pessoal. "
@@ -7,9 +21,13 @@ def welcome_message():
 def introduction_message():
     return (
         "📊 Como funciona o nosso bot:\n"
+
         "1️⃣ Me envie mensagens com suas transações financeiras. Exemplo: 'Gastei R$ 50 com supermercado'.\n"
+
         "2️⃣ Eu irei registrar todas as suas transações e você pode consultar um resumo diário sempre que precisar!\n"
+
         "3️⃣ Use comandos como 'resumo diário' para ver o total de despesas e receitas.\n\n"
+        
         "⚙️ Fique à vontade para enviar suas transações e vamos juntos organizar suas finanças! 💸"
     )
 

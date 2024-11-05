@@ -1,12 +1,14 @@
 from models import db, User, Transaction
 from pywa import WhatsApp
-from pywa.types import Message, CallbackButton
+from pywa.types import Message, CallbackButton, Button  
 
 from utils.format_brazilian_number import format_brazilian_number
 from utils.openai_api import openai_api
 from datetime import datetime
-
+from config import config
 from template.messages import (
+    trial_confirmation_message,
+    under_development_message,
     welcome_message,
     introduction_message,
     transaction_confirmation,
@@ -20,32 +22,28 @@ class MessageHandler:
         self.client = client
 
     def process_button_callback(self, callback: CallbackButton):
-        print(f"🔘 Botão pressionado por {callback.from_user.name}: {callback.payload}")
         user_phone = format_brazilian_number(callback.from_user.wa_id)
         user = User.query.filter_by(phone_number=user_phone).first()
 
         if callback.payload == "use_1_day":
+            #self.client.send_message(user_phone, trial_confirmation_message())
             pass
         elif callback.payload == "daily_summary":
             transactions = Transaction.query.filter_by(user_id=user.id).all()
             summary_msg = daily_summary(user, transactions)
             self.client.send_message(user_phone, summary_msg)
 
-    def process_message(self, msg: Message):
 
-        print(f"📲 Mensagem recebida de {msg.from_user.name}: {msg.text}")
+    def process_message(self, msg: Message):
         user_phone = format_brazilian_number(msg.from_user.wa_id)
         user = User.query.filter_by(phone_number=user_phone).first()
 
         if not user:
             user = self.register_new_user(user_phone, msg.from_user.name)
             self.send_welcome_sequence(user_phone)
-
-        # else:
-        #     message_text = msg.text
-        #     self.process_financial_message(user, message_text)
-
-        self.client.send_message(user_phone, "🤖 Desculpe, ainda estou em desenvolvimento e não posso processar mensagens financeiras.")
+        else:
+            #self.client.send_message(user_phone, under_development_message())
+            self.process_financial_message(user, msg.text)
 
     def register_new_user(self, user_phone, user_name):
         user = User(phone_number=user_phone, name=user_name)
@@ -56,38 +54,39 @@ class MessageHandler:
     def send_welcome_sequence(self, user_phone):
         """Enviar mensagens de boas-vindas e introdução para novos usuários."""
         self.client.send_message(user_phone, welcome_message())
-        self.client.send_message(user_phone, introduction_message(),
-                                  buttons=[{"text": "Usar por 1 dia.", "payload": "use_1_day"}]
-                                  )
+        self.client.send_message(user_phone, introduction_message(), buttons=[
+            Button("Use por 1 dia", callback_data="use_1_day"),
+        ])
+
 
     def process_financial_message(self, user, message_text):
         result = openai_api.create_completation(message_text)
+        print(result)
+        # try:
+        #     data = eval(result)
+        #     transaction = Transaction(
+        #         user_id=user.id,
+        #         value=data['value'],
+        #         money_type=data['money_type'],
+        #         category=data.get('category', 'Outros'),
+        #         currency=data.get('currency', 'BRL'),
+        #         date_time=datetime.fromisoformat(data['date_time']),
+        #     )
+        #     db.session.add(transaction)
 
-        try:
-            data = eval(result)
-            transaction = Transaction(
-                user_id=user.id,
-                value=data['value'],
-                money_type=data['money_type'],
-                category=data.get('category', 'Outros'),
-                currency=data.get('currency', 'BRL'),
-                date_time=datetime.fromisoformat(data['date_time']),
-            )
-            db.session.add(transaction)
+        #     # Atualiza o saldo do usuário
+        #     if transaction.money_type == 'received':
+        #         user.balance += transaction.value
+        #     elif transaction.money_type == 'spent':
+        #         user.balance -= transaction.value
 
-            # Atualiza o saldo do usuário
-            if transaction.money_type == 'received':
-                user.balance += transaction.value
-            elif transaction.money_type == 'spent':
-                user.balance -= transaction.value
+        #     db.session.commit()
 
-            db.session.commit()
+        #     confirmation_msg = transaction_confirmation(transaction)
+        #     self.client.send_message(user.phone_number, confirmation_msg)
 
-            confirmation_msg = transaction_confirmation(transaction)
-            self.client.send_message(user.phone_number, confirmation_msg)
-
-        except Exception as e:
-            self.client.send_message(user.phone_number, "⚠️ Houve um erro ao registrar sua transação.")
+        # except Exception as e:
+        #     self.client.send_message(user.phone_number, "⚠️ Houve um erro ao registrar sua transação.")
 
     def daily_summary(user, transactions):
         summary_by_category = {}

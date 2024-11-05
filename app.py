@@ -17,7 +17,7 @@ def create_app():
     wa = WhatsApp(
         app_id=config.APP_ID,
         app_secret=config.APP_SECRET,
-        token="EAAZAJJoITQn4BO1RoUmSRZBcuFUMNpExoFY5RBOppBk0DyEzyCGXxMFfLqUzcCxTelABKMpGTsbVPtyBIq5bdqb1AnJDqZAiBgGcv8dZBbHMeudYXqSkSmpPkbo1d2fBngtiWtW4htKiMgYu4EAX1dqgM0U17UgdSyJZBDAOkBMSd3Qf9NwyNvBqTUMTqyJHMaNSccrlZCt09QZB2KlUh8GGWqT5gwZD",
+        token=config.TOKEN,
         phone_id=config.PHONE_ID,
         server=app,
         callback_url=config.CALLBACK_URL,
@@ -35,7 +35,7 @@ def create_app():
     @wa.on_callback_button()
     def handle_callback(client, callback):
         handler = MessageHandler(client)
-        handler.process_callback(callback)
+        handler.process_button_callback(callback)
 
     with app.app_context():
         db.create_all()
